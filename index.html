@@ -7,16 +7,10 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  
-  <!-- Ethers.js - Load sớm và rõ ràng -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.min.js"></script>
-
-  <script>
-    tailwind.config = { content: [], theme: { extend: {} } }
-  </script>
 </head>
 <body class="bg-zinc-950 text-white min-h-screen">
 
+  <!-- Navbar -->
   <nav class="fixed top-0 w-full bg-zinc-900/95 backdrop-blur-md border-b border-zinc-700 z-50">
     <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
       <div class="flex items-center gap-3">
@@ -33,73 +27,45 @@
       </div>
 
       <div class="flex items-center gap-4">
-        <button onclick="addArcNetwork()" class="bg-zinc-800 hover:bg-zinc-700 px-5 py-2.5 rounded-2xl text-sm">Add Network</button>
-        <button onclick="connectWallet()" id="connectBtn" class="bg-emerald-500 hover:bg-emerald-600 px-6 py-2.5 rounded-2xl font-semibold">Connect Wallet</button>
+        <button onclick="addArcNetwork()" class="bg-zinc-800 hover:bg-zinc-700 px-5 py-2.5 rounded-2xl text-sm transition">Add Network</button>
+        <button onclick="connectWallet()" id="connectBtn" class="bg-emerald-500 hover:bg-emerald-600 px-6 py-2.5 rounded-2xl font-semibold transition">Connect Wallet</button>
       </div>
     </div>
   </nav>
 
-  <div class="max-w-5xl mx-auto px-6 pt-28 pb-12">
+  <div class="max-w-5xl mx-auto px-6 pt-28">
     <div id="dashboard-section" class="bg-zinc-900 rounded-3xl p-8">
       <h2 class="text-3xl font-bold mb-8">Portfolio</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="portfolio"></div>
-    </div>
-
-    <div id="swap-section" class="hidden bg-zinc-900 rounded-3xl p-8">
-      <h2 class="text-3xl font-bold text-center mb-8">Swap Tokens</h2>
-      <div class="max-w-md mx-auto space-y-6">
-        <div class="bg-zinc-800 rounded-2xl p-6">
-          <p class="text-zinc-400 mb-2">You Pay</p>
-          <div class="flex items-center justify-between">
-            <input type="text" value="100" class="bg-transparent text-5xl font-semibold w-40 focus:outline-none">
-            <div class="bg-zinc-700 px-5 py-3 rounded-xl">USDC</div>
-          </div>
-        </div>
-        <div class="flex justify-center"><i class="fa-solid fa-arrow-down text-3xl text-emerald-400"></i></div>
-        <div class="bg-zinc-800 rounded-2xl p-6">
-          <p class="text-zinc-400 mb-2">You Receive</p>
-          <div class="flex items-center justify-between">
-            <input type="text" value="99.75" class="bg-transparent text-5xl font-semibold w-40 focus:outline-none">
-            <div class="bg-zinc-700 px-5 py-3 rounded-xl">ARC</div>
-          </div>
-        </div>
-        <button onclick="performSwap()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-black font-bold py-5 rounded-2xl text-xl">Swap Now</button>
-      </div>
+      <div id="portfolio" class="grid grid-cols-3 gap-6"></div>
     </div>
   </div>
 
 <script>
-// Cấu hình
 const ARC_CHAIN_ID = '0x4cef52';
 let userAddress = null;
 
 async function connectWallet() {
-  if (typeof window.ethereum === "undefined") {
-    return alert("Vui lòng cài MetaMask!");
-  }
+  if (!window.ethereum) return alert("Vui lòng cài MetaMask!");
 
   try {
-    // Chuyển mạng
     try {
       await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: ARC_CHAIN_ID }] });
-    } catch (error) {
-      if (error.code === 4902) await addArcNetwork();
-      else throw error;
+    } catch (e) {
+      if (e.code === 4902) await addArcNetwork();
+      else throw e;
     }
 
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     userAddress = accounts[0];
 
     const btn = document.getElementById("connectBtn");
-    btn.innerHTML = `${userAddress.slice(0,6)}...${userAddress.slice(-4)}`;
+    btn.textContent = `${userAddress.slice(0,6)}...${userAddress.slice(-4)}`;
     btn.style.backgroundColor = "#10b981";
 
     alert(`✅ Kết nối thành công!\n\n${userAddress}`);
     loadPortfolio();
-
   } catch (error) {
-    console.error(error);
-    alert("Kết nối thất bại: " + (error.message || error));
+    alert("Lỗi: " + (error.message || error));
   }
 }
 
@@ -111,10 +77,33 @@ async function addArcNetwork() {
         chainId: ARC_CHAIN_ID,
         chainName: 'Arc Testnet',
         nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 },
-        rpcUrls: ['https://rpc.testnet.arc.network'],
-        blockExplorerUrls: ['https://testnet.arcscan.app']
+        rpcUrls: ['https://rpc.testnet.arc.network']
       }]
     });
     alert("✅ Đã thêm mạng Arc Testnet!");
   } catch (e) {
-   
+    alert("Không thể thêm mạng tự động.");
+  }
+}
+
+function loadPortfolio() {
+  document.getElementById("portfolio").innerHTML = `
+    <div class="bg-zinc-800 rounded-2xl p-6">
+      <p class="text-zinc-400">USDC</p>
+      <p class="text-4xl font-bold text-emerald-400">1,234.56</p>
+    </div>
+    <div class="bg-zinc-800 rounded-2xl p-6">
+      <p class="text-zinc-400">ARC</p>
+      <p class="text-4xl font-bold text-emerald-400">5,678.90</p>
+    </div>
+  `;
+}
+
+function showSection(section) {
+  alert("Chuyển sang tab: " + section + " (đang phát triển)");
+}
+
+console.log("🚀 ArcSum Finance loaded successfully!");
+</script>
+</body>
+</html>

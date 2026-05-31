@@ -3,62 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ArcSum Finance</title>
+  <title>ArcSum Finance - DEX on Arc</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 </head>
-<body class="bg-zinc-950 text-white">
+<body class="bg-zinc-950 text-white min-h-screen">
 
-  <div class="min-h-screen flex items-center justify-center">
-    <div class="text-center">
-      <h1 class="text-5xl font-bold mb-8 text-emerald-400">ArcSum Finance</h1>
+  <!-- Navbar -->
+  <nav class="fixed top-0 w-full bg-zinc-900/95 backdrop-blur-md border-b border-zinc-700 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">ArcSum</h1>
+        <span class="text-xs px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full">.finance</span>
+      </div>
       
-      <button onclick="connectWallet()" 
-              id="connectBtn"
-              class="bg-emerald-500 hover:bg-emerald-600 text-black font-bold text-xl px-12 py-6 rounded-3xl">
-        Connect Wallet
-      </button>
+      <div class="flex items-center gap-8 text-sm font-medium">
+        <a href="#" onclick="showSection('dashboard')" class="hover:text-emerald-400">Dashboard</a>
+        <a href="#" onclick="showSection('swap')" class="hover:text-emerald-400">Swap</a>
+        <a href="#" onclick="showSection('liquidity')" class="hover:text-emerald-400">Liquidity</a>
+        <a href="#" onclick="showSection('nft')" class="hover:text-emerald-400">NFT</a>
+        <a href="#" onclick="showSection('faucet')" class="hover:text-emerald-400">Faucet</a>
+      </div>
 
-      <p class="mt-8 text-zinc-400" id="status">Click nút Connect Wallet để test</p>
+      <div class="flex items-center gap-4">
+        <button onclick="addArcNetwork()" class="bg-zinc-800 hover:bg-zinc-700 px-5 py-2.5 rounded-2xl text-sm">Add Network</button>
+        <button onclick="connectWallet()" id="connectBtn" class="bg-emerald-500 hover:bg-emerald-600 px-6 py-2.5 rounded-2xl font-semibold">Connect Wallet</button>
+      </div>
     </div>
-  </div>
+  </nav>
 
-<script>
-console.log("🚀 Script đã load");
+  <div class="max-w-5xl mx-auto px-6 pt-28 pb-12">
 
-async function connectWallet() {
-  console.log("🔘 Nút Connect được click!");
+    <!-- DASHBOARD -->
+    <div id="dashboard-section" class="bg-zinc-900 rounded-3xl p-8">
+      <h2 class="text-3xl font-bold mb-8">Portfolio</h2>
+      <div id="portfolio" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+    </div>
 
-  if (!window.ethereum) {
-    alert("❌ MetaMask chưa cài hoặc chưa mở!");
-    return;
-  }
+    <!-- SWAP - ĐÃ HOÀN THIỆN -->
+    <div id="swap-section" class="hidden bg-zinc-900 rounded-3xl p-8">
+      <h2 class="text-3xl font-bold text-center mb-8">Swap Tokens</h2>
+      <div class="max-w-md mx-auto space-y-6">
+        <div class="bg-zinc-800 rounded-2xl p-6">
+          <p class="text-zinc-400 mb-2">You Pay</p>
+          <div class="flex items-center justify-between">
+            <input type="text" value="100" class="bg-transparent text-5xl font-semibold w-40 focus:outline-none">
+            <div class="bg-zinc-700 px-5 py-3 rounded-xl font-semibold">USDC</div>
+          </div>
+        </div>
 
-  try {
-    const accounts = await window.ethereum.request({ 
-      method: 'eth_requestAccounts' 
-    });
+        <div class="flex justify-center">
+          <i class="fa-solid fa-arrow-down text-4xl text-emerald-400"></i>
+        </div>
 
-    const address = accounts[0];
-    
-    document.getElementById("connectBtn").innerHTML = 
-      `${address.slice(0,6)}...${address.slice(-4)}`;
-    
-    document.getElementById("connectBtn").style.backgroundColor = "#10b981";
-    
-    document.getElementById("status").innerHTML = `✅ Đã kết nối!<br>${address}`;
-    
-    alert("✅ Kết nối thành công!\n\n" + address);
+        <div class="bg-zinc-800 rounded-2xl p-6">
+          <p class="text-zinc-400 mb-2">You Receive</p>
+          <div class="flex items-center justify-between">
+            <input type="text" value="99.75" class="bg-transparent text-5xl font-semibold w-40 focus:outline-none">
+            <div class="bg-zinc-700 px-5 py-3 rounded-xl font-semibold">ARC</div>
+          </div>
+        </div>
 
-  } catch (error) {
-    console.error(error);
-    alert("Lỗi: " + error.message);
-  }
-}
+        <button onclick="performSwap()" 
+                class="w-full bg-emerald-500 hover:bg-emerald-600 text-black font-bold py-6 rounded-2xl text-2xl transition">
+          Swap Now
+        </button>
+      </div>
+    </div>
 
-// Debug
-window.onload = () => {
-  console.log("📄 Trang web đã load xong");
-};
-</script>
-</body>
-</html>
+    <!-- Các tab khác -->
+    <div id="liquidity-section" class="hidden bg-zinc-900 rounded

@@ -9,62 +9,68 @@
 </head>
 <body class="bg-zinc-950 text-white min-h-screen">
 
-<nav class="fixed top-0 w-full bg-zinc-900 p-6">
-  <div class="max-w-7xl mx-auto flex justify-between">
-    <h1 class="text-3xl font-bold text-emerald-400">ArcSum Finance</h1>
-    <button onclick="connectWallet()" id="connectBtn" class="bg-emerald-500 px-8 py-3 rounded-2xl font-bold">
-      Connect Wallet
-    </button>
-  </div>
-</nav>
+  <nav class="fixed top-0 w-full bg-zinc-900 p-6 border-b border-zinc-700">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <h1 class="text-3xl font-bold text-emerald-400">ArcSum Finance</h1>
+      <button onclick="connectWallet()" id="connectBtn" 
+              class="bg-emerald-500 hover:bg-emerald-600 px-8 py-3 rounded-2xl font-bold">
+        Connect Wallet
+      </button>
+    </div>
+  </nav>
 
-<div class="max-w-md mx-auto pt-32 px-6">
-  <h2 class="text-3xl font-bold text-center mb-8">Swap USDC → ARC</h2>
-  
-  <div class="bg-zinc-900 rounded-3xl p-8">
-    <button onclick="performSwap()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-black font-bold py-6 rounded-2xl text-xl">
+  <div class="max-w-md mx-auto pt-32 px-6 text-center">
+    <h2 class="text-3xl font-bold mb-8">Swap USDC → ARC</h2>
+    
+    <div id="status" class="mb-6 text-red-400">Chưa kết nối ví</div>
+    
+    <button onclick="performSwap()" 
+            class="w-full bg-emerald-500 hover:bg-emerald-600 text-black font-bold py-6 rounded-2xl text-xl">
       Swap Now (Gọi Contract Thật)
     </button>
   </div>
-</div>
 
 <script>
-const ARC_TOKEN = "0x343D87e36171f47F499065b1e12CC8E583CD831c";
 let signer = null;
 let userAddress = null;
+const ARC_TOKEN = "0x343D87e36171f47F499065b1e12CC8E583CD831c";
 
 async function connectWallet() {
-  if (!window.ethereum) return alert("Cài MetaMask!");
+  if (!window.ethereum) return alert("Vui lòng cài MetaMask!");
 
-  const provider = new ethers.BrowserProvider(window.ethereum);
-  signer = await provider.getSigner();
-  userAddress = await signer.getAddress();
+  try {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    signer = await provider.getSigner();
+    userAddress = await signer.getAddress();
 
-  document.getElementById("connectBtn").innerHTML = userAddress.slice(0,6) + "..." + userAddress.slice(-4);
-  alert("✅ Kết nối thành công!");
+    document.getElementById("connectBtn").innerHTML = userAddress.slice(0,6) + "..." + userAddress.slice(-4);
+    document.getElementById("connectBtn").style.backgroundColor = "#10b981";
+    document.getElementById("status").innerHTML = "✅ Đã kết nối ví";
+    document.getElementById("status").className = "mb-6 text-emerald-400";
+
+    alert("✅ Kết nối thành công!\n" + userAddress);
+  } catch (e) {
+    alert("Lỗi kết nối: " + e.message);
+  }
 }
 
 async function performSwap() {
-  if (!signer) return alert("Chưa kết nối ví!");
+  if (!signer) {
+    return alert("Bạn chưa kết nối ví! Nhấn nút Connect Wallet trước.");
+  }
 
   try {
-    alert("🔄 Đang approve ARC token...");
+    alert("🔄 Đang thực hiện giao dịch thật...");
 
-    const abi = [
-      "function approve(address spender, uint256 amount) public returns (bool)"
-    ];
-
+    const abi = ["function approve(address spender, uint256 amount)"];
     const contract = new ethers.Contract(ARC_TOKEN, abi, signer);
-    
-    // Approve 1000 ARC cho ví (bạn có thể thay địa chỉ spender sau)
+
     const tx = await contract.approve(userAddress, ethers.parseUnits("1000", 18));
     await tx.wait();
 
-    alert("✅ Approve thành công!\nBạn có thể swap sau khi có Router.");
-    
+    alert("✅ Approve ARC token thành công!\nBạn đã cho phép swap.");
   } catch (error) {
-    console.error(error);
-    alert("Lỗi: " + error.message);
+    alert("Lỗi giao dịch: " + error.message);
   }
 }
 </script>
